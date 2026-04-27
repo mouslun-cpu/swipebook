@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
+import { getDatabase, Database } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,5 +12,22 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-export const db = getDatabase(app);
+let _db: Database | null = null;
+
+function initDb(): Database {
+  if (!_db) {
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    _db = getDatabase(app);
+  }
+  return _db;
+}
+
+// Lazy proxy: defers getDatabase() until first use so Next.js build
+// doesn't crash when NEXT_PUBLIC_* env vars are absent at build time.
+export const db: Database = new Proxy({} as Database, {
+  get(_, prop) {
+    const realDb = initDb();
+    const value = Reflect.get(realDb, prop, realDb);
+    return typeof value === 'function' ? value.bind(realDb) : value;
+  },
+});
