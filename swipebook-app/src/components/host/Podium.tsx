@@ -52,7 +52,7 @@ export default function Podium({ roomId }: PodiumProps) {
           const entry = sorted[rank];
           if (!entry) return <div key={rank} className="w-32" />;
           const [id, player] = entry;
-          const heights = [160, 220, 120];
+          const heights = [220, 160, 120];
           return (
             <motion.div
               key={id}

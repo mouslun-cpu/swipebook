@@ -23,9 +23,13 @@ export default function SwipeCard({ question, leftLabel, rightLabel, onSwipe, di
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     setIsDragging(false);
     if (disabled) return;
-    if (info.offset.x < -100) {
+    const swipeLeft = info.offset.x < -80 || info.velocity.x < -500;
+    const swipeRight = info.offset.x > 80 || info.velocity.x > 500;
+    if (swipeLeft) {
+      x.set(0);
       onSwipe('debit');
-    } else if (info.offset.x > 100) {
+    } else if (swipeRight) {
+      x.set(0);
       onSwipe('credit');
     } else {
       x.set(0);
@@ -57,7 +61,7 @@ export default function SwipeCard({ question, leftLabel, rightLabel, onSwipe, di
       {/* Card */}
       <motion.div
         drag={disabled ? false : 'x'}
-        dragConstraints={{ left: -300, right: 300 }}
+        dragConstraints={false}
         style={{ x, rotate, scale: cardScale }}
         onDragStart={() => setIsDragging(true)}
         onDragEnd={handleDragEnd}
